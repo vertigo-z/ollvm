@@ -1,12 +1,12 @@
 <p>
-  <d><strong>ollvm-22</strong></d>
+  <d><strong>ollvm-23</strong></d>
   <br/>
-  <sup>obfuscator llvm 22</sup>
+  <sup>obfuscator llvm 23</sup>
   <br/>
-  <a href="https://deepwiki.com/vertigo6622/ollvm-22"><img src="https://deepwiki.com/badge.svg" alt="Ask DeepWiki"></a>
+  <a href="https://deepwiki.com/vertigo6622/ollvm-23"><img src="https://deepwiki.com/badge.svg" alt="Ask DeepWiki"></a>
 </p>
 
-<p>ollvm (obfuscator llvm) plugin ported to llvm 22.1.1. add bogus control flow, flattening, splitting, substitution to obfuscate your C/C++ code.</p>
+<p>ollvm (obfuscator llvm) plugin ported to llvm 23.1.1. add bogus control flow, flattening, splitting, substitution to obfuscate your C/C++ code.</p>
 
 ## usage:
 
@@ -20,12 +20,12 @@ clang -fpass-plugin=libObfuscation.so -mllvm -fla -mllvm -bcf -mllvm -sub -mllvm
 *llvm installed via brew:*
 
 ```
-cd ollvm-22 && mkdir build && cd build && cmake ../obfuscation && make
+cd ollvm-23 && mkdir build && cd build && cmake ../obfuscation && make
 ```
 
 *llvm anywhere else:*
 ```
-cd ollvm-22 && mkdir build && cd build && cmake -DLLVM_DIR=<llvm location> ../obfuscation && make
+cd ollvm-23 && mkdir build && cd build && cmake -DLLVM_DIR=<llvm location> ../obfuscation && make
 ```
 
 ---

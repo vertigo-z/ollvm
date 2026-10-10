@@ -126,13 +126,9 @@ bool flatten(Function &F) {
   BasicBlock *insert = &*tmp;
 
   // If main begin with an if
-  BranchInst *br = NULL;
-  if (isa<BranchInst>(insert->getTerminator())) {
-    br = cast<BranchInst>(insert->getTerminator());
-  }
+  CondBrInst *br = dyn_cast<CondBrInst>(insert->getTerminator());
 
-  if ((br != NULL && br->isConditional()) ||
-      insert->getTerminator()->getNumSuccessors() > 1) {
+  if (br != NULL || insert->getTerminator()->getNumSuccessors() > 1) {
     BasicBlock::iterator i = insert->end();
     --i;
 
@@ -162,14 +158,14 @@ bool flatten(Function &F) {
 
   // Move first BB on top
   insert->moveBefore(loopEntry);
-  BranchInst::Create(loopEntry, insert);
+  UncondBrInst::Create(loopEntry, insert);
 
   // loopEnd jump to loopEntry
-  BranchInst::Create(loopEntry, loopEnd);
+  UncondBrInst::Create(loopEntry, loopEnd);
 
   BasicBlock *swDefault =
       BasicBlock::Create(F.getContext(), "switchDefault", &F, loopEnd);
-  BranchInst::Create(loopEnd, swDefault);
+  UncondBrInst::Create(loopEnd, swDefault);
 
   // Create switch instruction itself and set condition
   switchI = SwitchInst::Create(&*F.begin(), swDefault, 0, loopEntry);
@@ -178,7 +174,7 @@ bool flatten(Function &F) {
   // Remove branch jump from 1st BB and make a jump to the while
   F.begin()->getTerminator()->eraseFromParent();
 
-  BranchInst::Create(loopEntry, &*F.begin());
+  UncondBrInst::Create(loopEntry, &*F.begin());
 
   // Put all BB in the switch
   for (vector<BasicBlock *>::iterator b = origBB.begin(); b != origBB.end();
@@ -226,7 +222,7 @@ bool flatten(Function &F) {
 
       // Update switchVar and jump to the end of loop
       new StoreInst(numCase, load->getPointerOperand(), i);
-      BranchInst::Create(loopEnd, i);
+      UncondBrInst::Create(loopEnd, i);
       continue;
     }
 
@@ -254,7 +250,7 @@ bool flatten(Function &F) {
       }
 
       // Create a SelectInst
-      BranchInst *br = cast<BranchInst>(i->getTerminator());
+      CondBrInst *br = cast<CondBrInst>(i->getTerminator());
       SelectInst *sel =
           SelectInst::Create(br->getCondition(), numCaseTrue, numCaseFalse, "",
                              i->getTerminator());
@@ -264,7 +260,7 @@ bool flatten(Function &F) {
 
       // Update switchVar and jump to the end of loop
       new StoreInst(sel, load->getPointerOperand(), i);
-      BranchInst::Create(loopEnd, i);
+      UncondBrInst::Create(loopEnd, i);
       continue;
     }
   }

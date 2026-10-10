@@ -14,8 +14,6 @@ include_directories(${LLVM_INCLUDE_DIRS})
 separate_arguments(LLVM_DEFINITIONS_LIST NATIVE_COMMAND ${LLVM_DEFINITIONS})
 add_definitions(${LLVM_DEFINITIONS_LIST})
 
-llvm_map_components_to_libnames(llvm_libs core support ipo transformutils scalaropts irreader)
-
 add_library(Obfuscation MODULE
   CryptoUtils.cpp
   Substitution.cpp
@@ -33,5 +31,5 @@ if(APPLE)
     LINK_FLAGS "-undefined dynamic_lookup"
   )
 else()
-  target_link_libraries(Obfuscation ${llvm_libs})
+  target_link_libraries(Obfuscation LLVM)
 endif()

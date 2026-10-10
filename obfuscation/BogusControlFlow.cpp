@@ -295,13 +295,13 @@ void addBogusFlow(BasicBlock *basicBlock, Function &F) {
 
   // Jump to the original basic block if the condition is true or
   // to the altered block if false.
-  BranchInst::Create(originalBB, alteredBB, (Value *)condition, basicBlock);
+  CondBrInst::Create((Value *)condition, originalBB, alteredBB, basicBlock);
   DEBUG_WITH_TYPE(
       "gen",
       errs() << "bcf: Terminator instruction in first basic block: ok\n");
 
   // The altered block loop back on the original one.
-  BranchInst::Create(originalBB, alteredBB);
+  UncondBrInst::Create(originalBB, alteredBB);
   DEBUG_WITH_TYPE(
       "gen", errs() << "bcf: Terminator instruction in altered block: ok\n");
 
@@ -327,7 +327,7 @@ void addBogusFlow(BasicBlock *basicBlock, Function &F) {
   Twine *var6 = new Twine("condition2");
   FCmpInst *condition2 =
       new FCmpInst(originalBB, CmpInst::FCMP_TRUE, LHS, RHS, *var6);
-  BranchInst::Create(originalBBpart2, alteredBB, (Value *)condition2,
+  CondBrInst::Create((Value *)condition2, originalBBpart2, alteredBB,
                      originalBB);
   DEBUG_WITH_TYPE("gen", errs()
                              << "bcf: Terminator original basic block: ok\n");
@@ -600,18 +600,15 @@ bool doF(Module &M, Function &F) {
   for (Function::iterator fi = F.begin(), fe = F.end(); fi != fe; ++fi) {
     // fi->setName("");
     Instruction *tbb = fi->getTerminator();
-    if (tbb->getOpcode() == Instruction::Br) {
-      BranchInst *br = (BranchInst *)(tbb);
-      if (br->isConditional()) {
-        FCmpInst *cond = (FCmpInst *)br->getCondition();
-        unsigned opcode = cond->getOpcode();
-        if (opcode == Instruction::FCmp) {
-          if (cond->getPredicate() == FCmpInst::FCMP_TRUE) {
-            DEBUG_WITH_TYPE("gen", errs()
-                                       << "bcf: an always true predicate !\n");
-            toDelete.push_back(cond); // The condition
-            toEdit.push_back(tbb);    // The branch using the condition
-          }
+    if (auto *br = dyn_cast<CondBrInst>(tbb)) {
+      FCmpInst *cond = (FCmpInst *)br->getCondition();
+      unsigned opcode = cond->getOpcode();
+      if (opcode == Instruction::FCmp) {
+        if (cond->getPredicate() == FCmpInst::FCMP_TRUE) {
+          DEBUG_WITH_TYPE("gen", errs()
+                                     << "bcf: an always true predicate !\n");
+          toDelete.push_back(cond); // The condition
+          toEdit.push_back(tbb);    // The branch using the condition
         }
       }
     }
@@ -645,11 +642,11 @@ bool doF(Module &M, Function &F) {
     op1 = BinaryOperator::Create(Instruction::Or, (Value *)condition,
                                  (Value *)condition2, "", (*i));
 
-    BranchInst::Create(((BranchInst *)*i)->getSuccessor(0),
-                       ((BranchInst *)*i)->getSuccessor(1), (Value *)op1,
-                       ((BranchInst *)*i)->getParent());
+    auto *oldBr = cast<CondBrInst>(*i);
+    CondBrInst::Create((Value *)op1, oldBr->getSuccessor(0),
+                       oldBr->getSuccessor(1), oldBr->getParent());
     DEBUG_WITH_TYPE("gen", errs() << "bcf: Erase branch instruction:"
-                                  << *((BranchInst *)*i) << "\n");
+                                  << *oldBr << "\n");
     (*i)->eraseFromParent(); // erase the branch
   }
   // Erase all the associated conditions we found
