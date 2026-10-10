@@ -3,7 +3,6 @@
   <br/>
   <sup>obfuscator llvm 23</sup>
   <br/>
-  <a href="https://deepwiki.com/vertigo6622/ollvm-23"><img src="https://deepwiki.com/badge.svg" alt="Ask DeepWiki"></a>
 </p>
 
 <p>ollvm (obfuscator llvm) plugin ported to llvm 23.1.1. add bogus control flow, flattening, splitting, substitution to obfuscate your C/C++ code.</p>
