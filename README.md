@@ -19,12 +19,12 @@ clang -fpass-plugin=libObfuscation.so -mllvm -fla -mllvm -bcf -mllvm -sub -mllvm
 *llvm installed via brew:*
 
 ```
-cd ollvm-23 && mkdir build && cd build && cmake ../obfuscation && make
+cd ollvm && mkdir build && cd build && cmake ../obfuscation && make
 ```
 
 *llvm anywhere else:*
 ```
-cd ollvm-23 && mkdir build && cd build && cmake -DLLVM_DIR=<llvm location> ../obfuscation && make
+cd ollvm && mkdir build && cd build && cmake -DLLVM_DIR=<llvm location> ../obfuscation && make
 ```
 
 ---
